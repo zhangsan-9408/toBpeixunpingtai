@@ -2,19 +2,27 @@
   <div class="exams-page">
     <h1>我的考试</h1>
     <div class="exam-list">
-      <div class="exam-card">
-        <h3>JavaScript 基础测试</h3>
-        <p>题目数量：10题 | 总分：100分</p>
-        <button class="btn">开始考试</button>
-      </div>
-      <div class="exam-card">
-        <h3>产品知识考核</h3>
-        <p>题目数量：20题 | 总分：100分</p>
-        <button class="btn">开始考试</button>
+      <div v-for="exam in mockExams" :key="exam.id" class="exam-card">
+        <h3>{{ exam.title }}</h3>
+        <p>{{ exam.description }}</p>
+        <div v-if="exam.status === 'completed'" class="score">
+          得分: {{ exam.score }}分
+        </div>
+        <button class="btn" @click="startExam(exam)">
+          {{ exam.status === 'completed' ? '查看详情' : '开始考试' }}
+        </button>
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { mockExams } from '../api/mock'
+
+const startExam = (exam) => {
+  alert(`开始考试: ${exam.title}`)
+}
+</script>
 
 <style scoped>
 .exams-page h1 {
@@ -42,7 +50,13 @@
 .exam-card p {
   color: #666;
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+}
+
+.score {
+  color: #667eea;
+  font-weight: bold;
+  margin-bottom: 12px;
 }
 
 .btn {

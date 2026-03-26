@@ -1,27 +1,30 @@
 <template>
   <div class="dashboard">
-    <h1>欢迎回来，{{ userStore.userInfo?.real_name }}</h1>
+    <h1>欢迎回来，{{ userStore.userInfo?.real_name || '用户' }}</h1>
     <div class="stats-cards">
       <div class="card">
         <h3>在学课程</h3>
-        <p class="number">3</p>
+        <p class="number">{{ stats.learning }}</p>
       </div>
       <div class="card">
         <h3>已完成</h3>
-        <p class="number">5</p>
+        <p class="number">{{ stats.completed }}</p>
       </div>
       <div class="card">
         <h3>考试次数</h3>
-        <p class="number">12</p>
+        <p class="number">{{ stats.exams }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useUserStore } from '../stores/user'
+import { mockStats } from '../api/mock'
 
 const userStore = useUserStore()
+const stats = ref(mockStats)
 </script>
 
 <style scoped>

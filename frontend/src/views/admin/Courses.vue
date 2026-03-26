@@ -13,22 +13,20 @@
             <th>课程名称</th>
             <th>分类</th>
             <th>状态</th>
-            <th>创建时间</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="course in courses" :key="course.id">
+          <tr v-for="course in mockCourses" :key="course.id">
             <td>{{ course.id }}</td>
             <td>{{ course.title }}</td>
-            <td>{{ course.category_name || '-' }}</td>
+            <td>{{ course.category_name }}</td>
             <td>
-              <span :class="['status', course.status]">{{ getStatusText(course.status) }}</span>
+              <span class="status published">已发布</span>
             </td>
-            <td>{{ formatDate(course.created_at) }}</td>
             <td>
               <button class="btn-small" @click="editCourse(course)">编辑</button>
-              <button class="btn-small danger" @click="deleteCourse(course.id)">删除</button>
+              <button class="btn-small danger" @click="deleteCourse(course)">删除</button>
             </td>
           </tr>
         </tbody>
@@ -59,59 +57,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getCourses, createCourse } from '../../api/courses'
+import { ref } from 'vue'
+import { mockCourses } from '../../api/mock'
 
-const courses = ref([])
 const showCreateModal = ref(false)
 const form = ref({
   title: '',
   description: ''
 })
 
-const statusTexts = {
-  draft: '草稿',
-  published: '已发布',
-  archived: '已归档'
-}
-
-const getStatusText = (status) => statusTexts[status] || status
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('zh-CN')
-}
-
-const fetchCourses = async () => {
-  try {
-    const data = await getCourses({ limit: 100 })
-    courses.value = data.list || []
-  } catch (error) {
-    console.error('获取课程失败:', error)
-  }
-}
-
-const handleCreate = async () => {
-  try {
-    await createCourse(form.value)
-    showCreateModal.value = false
-    form.value = { title: '', description: '' }
-    fetchCourses()
-  } catch (error) {
-    console.error('创建课程失败:', error)
-  }
+const handleCreate = () => {
+  alert('课程创建成功（演示模式）')
+  showCreateModal.value = false
+  form.value = { title: '', description: '' }
 }
 
 const editCourse = (course) => {
-  alert('编辑功能开发中...')
+  alert(`编辑课程: ${course.title}`)
 }
 
-const deleteCourse = (id) => {
-  if (confirm('确定要删除这个课程吗？')) {
-    alert('删除功能开发中...')
+const deleteCourse = (course) => {
+  if (confirm(`确定要删除课程"${course.title}"吗？`)) {
+    alert('课程已删除（演示模式）')
   }
 }
-
-onMounted(fetchCourses)
 </script>
 
 <style scoped>
@@ -167,11 +136,6 @@ th {
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 12px;
-}
-
-.status.draft {
-  background: #fff3cd;
-  color: #856404;
 }
 
 .status.published {

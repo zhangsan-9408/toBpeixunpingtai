@@ -1,53 +1,78 @@
-import axios from 'axios'
-import { useUserStore } from '../stores/user'
+// API 请求封装 - GitHub Pages 版本使用 Mock 数据
 
-// 创建 axios 实例
-const request = axios.create({
-  baseURL: '/api',
-  timeout: 30000
-})
+import { mockUser, mockCourses, mockCategories, mockExams, mockStats } from './mock'
 
-// 请求拦截器
-request.interceptors.request.use(
-  (config) => {
-    const userStore = useUserStore()
-    if (userStore.token) {
-      config.headers.Authorization = `Bearer ${userStore.token}`
+// 模拟延迟
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Mock API 请求
+const mockRequest = {
+  async post(url, data) {
+    await delay(300)
+    
+    if (url === '/auth/login') {
+      const { username, password } = data
+      if ((username === 'admin' || username === 'admin@company.com') && password === '123456') {
+        return {
+          code: 200,
+          message: '登录成功',
+          data: mockUser
+        }
+      }
+      if ((username === 'student1' || username === 'student1@company.com') && password === '123456') {
+        return {
+          code: 200,
+          message: '登录成功',
+          data: { ...mockUser, username: 'student1', real_name: '李明', role: 'student' }
+        }
+      }
+      throw new Error('用户名或密码错误')
     }
-    return config
+    
+    throw new Error('API 未实现')
   },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
-// 响应拦截器
-request.interceptors.response.use(
-  (response) => {
-    const { data } = response
+  
+  async get(url, params) {
+    await delay(200)
     
-    // 业务错误处理
-    if (data.code !== 200) {
-      alert(data.message || '请求失败')
-      return Promise.reject(new Error(data.message))
+    if (url === '/courses') {
+      return {
+        code: 200,
+        data: {
+          list: mockCourses,
+          pagination: { page: 1, limit: 10, total: mockCourses.length }
+        }
+      }
     }
     
-    return data.data
-  },
-  (error) => {
-    const { response } = error
-    
-    if (response?.status === 401) {
-      const userStore = useUserStore()
-      userStore.logout()
-      window.location.href = '/login'
-      alert('登录已过期，请重新登录')
-    } else {
-      alert(error.message || '网络错误')
+    if (url.startsWith('/courses/')) {
+      const id = parseInt(url.split('/')[2])
+      const course = mockCourses.find(c => c.id === id)
+      if (course) {
+        return {
+          code: 200,
+          data: { ...course, materials: [] }
+        }
+      }
+      throw new Error('课程不存在')
     }
     
-    return Promise.reject(error)
+    if (url === '/auth/profile') {
+      return {
+        code: 200,
+        data: mockUser
+      }
+    }
+    
+    throw new Error('API 未实现')
   }
-)
+}
 
-export default request
+// 导出请求方法
+export default mockRequest
+
+// 为了兼容性，导出常用方法
+export const login = (data) => mockRequest.post('/auth/login', data)
+export const getProfile = () => mockRequest.get('/auth/profile')
+export const getCourses = (params) => mockRequest.get('/courses', params)
+export const getCourseDetail = (id) => mockRequest.get(`/courses/${id}`)
