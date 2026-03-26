@@ -1,0 +1,9 @@
+@echo off
+set DB_HOST=localhost
+set DB_PORT=5432
+set DB_NAME=training_platform
+set DB_USER=postgres
+set DB_PASSWORD=changeme123
+set JWT_SECRET=your-secret-key-change-this-in-production
+set UPLOAD_DIR=./uploads
+D:\openclaw\nodejs\node.exe src/server.js
