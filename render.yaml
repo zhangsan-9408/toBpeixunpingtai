@@ -1,0 +1,58 @@
+# Render 部署配置
+# 访问 https://dashboard.render.com/ 创建服务
+
+services:
+  # 后端 API 服务
+  - type: web
+    name: etp-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        fromDatabase:
+          name: etp-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: etp-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: etp-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: etp-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: etp-postgres
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: UPLOAD_DIR
+        value: /app/uploads
+
+  # 前端静态站点
+  - type: static
+    name: etp-frontend
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://etp-backend.onrender.com/api/$1
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: etp-postgres
+    databaseName: training_platform
+    user: postgres
+    plan: free
